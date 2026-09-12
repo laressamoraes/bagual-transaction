@@ -32,6 +32,48 @@ public class Transaction {
     public Transaction() {
     }
 
+    public Transaction(TransactionType transactionType, UUID originAccountId, UUID destinationAccountId, BigDecimal amount) {
+        validatePositiveAmount(amount);
+        validateDestination(transactionType, destinationAccountId);
+
+        this.transactionType = transactionType;
+        this.originAccountId = originAccountId;
+        this.destinationAccountId = destinationAccountId;
+        this.amount = amount;
+        this.transactionStatus = TransactionStatus.PENDENTE;
+    }
+
+    public void complete() {
+        validatePendingStatus();
+        this.transactionStatus = TransactionStatus.CONCLUIDA;
+    }
+
+    public void fail() {
+        validatePendingStatus();
+        this.transactionStatus = TransactionStatus.FALHOU;
+    }
+
+    private void validatePositiveAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("O valor deve ser positivo! ");
+        }
+    }
+
+    private void validateDestination(TransactionType transactionType, UUID destinationAccountId) {
+        if (transactionType == TransactionType.TRANSFERENCIA && destinationAccountId == null) {
+            throw new IllegalArgumentException("Transferência exige uma conta de destino!");
+        }
+        if (transactionType != TransactionType.TRANSFERENCIA && destinationAccountId != null) {
+            throw new IllegalArgumentException("Apenas transferências podem ter conta de destino!");
+        }
+    }
+
+    private void validatePendingStatus() {
+        if (this.transactionStatus !=  TransactionStatus.PENDENTE) {
+            throw new IllegalStateException("Apenas transações pendentes podem ter seu status alterado!");
+        }
+    }
+
     public UUID getTransactionId() {
         return transactionId;
     }
