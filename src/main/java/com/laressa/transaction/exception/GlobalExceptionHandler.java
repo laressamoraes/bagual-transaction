@@ -57,4 +57,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(AccountIntegrationException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountIntegrationException(AccountIntegrationException ex) {
+        Map<String, Object> body = Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", ex.getStatusCode().value(),
+                "message", "Erro ao processar no account: " + ex.getMessage()
+        );
+        return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
 }
