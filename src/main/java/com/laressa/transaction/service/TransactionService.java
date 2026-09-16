@@ -7,6 +7,7 @@ import com.laressa.transaction.exception.TransactionNotFoundException;
 import com.laressa.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +47,23 @@ public class TransactionService {
         switch (transaction.getTransactionType()) {
             case DEPOSITO -> accountClient.credit(transaction.getOriginAccountId(), transaction.getAmount());
             case SAQUE -> accountClient.debit(transaction.getOriginAccountId(), transaction.getAmount());
-            case TRANSFERENCIA -> throw new UnsupportedOperationException("Transferência ainda não implementada!");
+            case TRANSFERENCIA -> processTransfer(transaction);
+        }
+    }
+
+    private void processTransfer(Transaction transaction) {
+        UUID originAccountId = transaction.getOriginAccountId();
+        UUID destinationAccountId = transaction.getDestinationAccountId();
+        BigDecimal amount = transaction.getAmount();
+
+        accountClient.debit(originAccountId, amount);
+
+        try {
+            accountClient.credit(destinationAccountId, amount);
+        } catch (Exception ex) {
+            accountClient.credit(originAccountId, amount);
+
+            throw ex;
         }
     }
 
