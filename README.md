@@ -11,26 +11,27 @@ O sistema é dividido em microsserviços independentes:
 | SERVIÇO | RESPONSABILIDADE | STATUS |
 |---|---|---|
 | account      | Cadastro de contas, consulta de saldo, débito/crédito | **Implementado** |
-| transaction  | Depósitos, saques e transferências entre contas       | **Em andamento** |
-| notification | Notificações assíncronas sobre transações realizadas  | **Não iniciado** |
+| transaction  | Depósitos, saques e transferências entre contas       | **Implementado** |
+| notification | Notificações assíncronas sobre transações realizadas  | **Em andamento** |
 
-## account - funcionalidades implementadas
-* Criar conta ('POST /accounts')
-* Buscar conta por id ('GET /accounts/{id}')
-* Listar contas ('GET /accounts')
-* Débito de Saldo ('PATCH /accounts/{id}/debit')
-* Crédito de saldo ('PATCH /accounts/{id}/credit')
-* Bloqueio/ativação de conta
+## transaction - funcionalidades implementadas
+* Criar transação ('POST /transactions')
+* Buscar transação por id ('GET /transactions/{id}')
+* Listar transações ('GET /transactions')
+* Integração real com o Account (débito/crédito via REST)
+* Compensação automática em falha de transferência (padrão Saga)
 * Validação de dados de entrada
+* Tratamento centralizado de erros, incluindo erros propagados pelo Account
 * Migração de schema com Flyway
-* Testes unitários (regra de negócio e service layer)
+* Testes unitários (regra de negócio, cenários de falha e compensação)
 * Containerização completa (aplicação + banco via Docker Compose)
 
 ## Como executar
 
 #### Pré-requisito
 
-- Docker Desktop instalado e em execução.
+- Docker Desktop instalado e em execução;
+- [account] (https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
 
 #### Subindo a aplicação
 
@@ -42,7 +43,7 @@ docker compose up --build -d
 
 A API estará disponível em:
 
-`http://localhost:8081`
+`http://localhost:8082`
 
 #### Parando a aplicação
 
@@ -71,5 +72,10 @@ mvn test
 - Maven;
 - PostgreSQL;
 - Flyway;
+- RestClient (comunicação síncrona com o Account);
 - JUnit 5 e Mockito;
 - Docker e Docker Compose.
+
+# Limitações conhecidas
+* A compensação da transferência não é garantida caso o próprio passo de compensação falhe;
+* A comunicação entre 'transaction' e 'account', quando ambos containerizados, depende de 'host.docker.internal'.
