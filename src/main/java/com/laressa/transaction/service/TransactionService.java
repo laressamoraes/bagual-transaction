@@ -3,6 +3,7 @@ package com.laressa.transaction.service;
 import com.laressa.transaction.client.AccountClient;
 import com.laressa.transaction.domain.Transaction;
 import com.laressa.transaction.dto.TransactionRequestDTO;
+import com.laressa.transaction.event.TransactionEventPublisher;
 import com.laressa.transaction.exception.TransactionNotFoundException;
 import com.laressa.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,12 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountClient accountClient;
+    private final TransactionEventPublisher eventPublisher;
 
-    public TransactionService(TransactionRepository transactionRepository, AccountClient accountClient) {
+    public TransactionService(TransactionRepository transactionRepository, AccountClient accountClient, TransactionEventPublisher eventPublisher) {
         this.transactionRepository = transactionRepository;
         this.accountClient = accountClient;
+        this.eventPublisher = eventPublisher;
     }
 
     public Transaction createTransaction(TransactionRequestDTO request) {
@@ -40,7 +43,10 @@ public class TransactionService {
             throw ex;
         }
 
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        eventPublisher.publish(saved);
+
+        return saved;
     }
 
     private void processTransaction(Transaction transaction) {
