@@ -1,81 +1,50 @@
-# bagual-bank
-Sistema financeiro simplificado construído em arquitetura de microsserviços, simulando operações bancárias básicas como criação de conta, depósito, saque e transferências.
+# transaction
+Microsserviço de transações do Bagual Bank: depósitos, saques e transferência entre contas.
 
-No Rio Grande do Sul, bagual é um termo que serve pra descrever um cavalo xucro, selvagem, não domado. Mas quando usado pra se referir a pessoas, representa coragem, resiliência e autenticidade.
+## Sobre o serviço
+Ao criar uma transação, o serviço chama o `account` via REST para debitar/creditar o saldo e publica um evento no Kafka para o `notification` de forma assíncrona.
+Transferências utilizam um padrão de compensação: se o débito na conta de origem for bem-sucedido mas o crédito na conta de destino falhar, o valor é devolvido automaticamente à origem.
 
-# Sobre o projeto
-Tem como objetivo aplicar os conceitos e ferramentas utilizados em sistemas corporativos de médio/grande porte: comunicação entre serviços, consistência de dados distribuídos, testes automatizados e containerização.
-
-# Arquitetura
-O sistema é dividido em microsserviços independentes:
-| SERVIÇO | RESPONSABILIDADE | STATUS |
-|---|---|---|
-| account      | Cadastro de contas, consulta de saldo, débito/crédito | **Implementado** |
-| transaction  | Depósitos, saques e transferências entre contas       | **Implementado** |
-| notification | Notificações assíncronas sobre transações realizadas  | **Em andamento** |
-
-## transaction - funcionalidades implementadas
-* Criar transação ('POST /transactions')
-* Buscar transação por id ('GET /transactions/{id}')
-* Listar transações ('GET /transactions')
-* Integração real com o Account (débito/crédito via REST)
+## Funcionalidades implementadas
+* Criar transação (`POST /transactions`)
+* Buscar transação por id (`GET /transactions/{id}`)
+* Listar transações (`GET /transactions`)
+* Integração real com o account (débito/crédito via REST)
 * Compensação automática em falha de transferência (padrão Saga)
 * Validação de dados de entrada
-* Tratamento centralizado de erros, incluindo erros propagados pelo Account
+* Tratamento centralizado de erros, incluindo erros propagados pelo account
 * Migração de schema com Flyway
 * Testes unitários (regra de negócio, cenários de falha e compensação)
 * Containerização completa (aplicação + banco via Docker Compose)
 
+## Tecnologias
+- Java 21 + Spring Boot 3;
+- Maven;
+- PostgreSQL;
+- Flyway;
+- Apache Kafka (Spring Kafka);
+- JUnit 5, Mockito e AssertJ;
+- Docker e Docker Compose.
+
+## Decisões técnicas
+* **Rich Domain Model:** regras de negócio vivem na entidade Transaction;
+* **Saga com compensação:** transferências que falham no meio do caminho são revertidas automaticamente, evitando inconsistência de saldo entre contas;
+* **Eventos com campo em String, não enum:** o `TransactionEvent` usa String para tipo e status, evitando acoplamento entre os enums do `transaction` e do `notification`, que são projetos independentes;
+* **Kafka com listeners separados:** o broker expõe um listener externo e um interno, permitindo que `transaction` e `notification` se comuniquem de forma confiável mesmo estando containerizados.
+
 ## Como executar
 
-#### Pré-requisito
-
-- Docker Desktop instalado e em execução;
-- [account] (https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
-
-#### Subindo a aplicação
-
-Na raiz do projeto, execute:
+Pré-requisito: Docker Desktop instalado e em execução, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
+O Kafka está definido neste `docker-compose.yml` e precisa subir antes do `notification`!
 
 ```bash
 docker compose up --build -d
 ```
 
-A API estará disponível em:
-
-`http://localhost:8082`
-
-#### Parando a aplicação
-
-Para parar os containers:
-
-```bash
-docker compose down
-```
-
-Para parar os containers e remover os dados do banco:
-
-```bash
-docker compose down -v
-```
+A API fica disponível em: http://localhost:8082
 
 ## Rodando os testes
-
-Para executar os testes automatizados:
 
 ```bash
 mvn test
 ```
-
-# Tecnologias
-- Java 21 + Spring Boot 3;
-- Maven;
-- PostgreSQL;
-- Flyway;
-- RestClient (comunicação síncrona com o Account);
-- JUnit 5 e Mockito;
-- Docker e Docker Compose.
-
-# Limitações conhecidas
-* A compensação da transferência não é garantida caso o próprio passo de compensação falhe;
-* A comunicação entre 'transaction' e 'account', quando ambos containerizados, depende de 'host.docker.internal'.
