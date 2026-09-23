@@ -3,6 +3,7 @@ Microsserviço de transações do Bagual Bank: depósitos, saques e transferênc
 
 ## Sobre o serviço
 Ao criar uma transação, o serviço chama o `account` via REST para debitar/creditar o saldo e publica um evento no Kafka para o `notification` de forma assíncrona.
+
 Transferências utilizam um padrão de compensação: se o débito na conta de origem for bem-sucedido mas o crédito na conta de destino falhar, o valor é devolvido automaticamente à origem.
 
 ## Funcionalidades implementadas
@@ -35,6 +36,7 @@ Transferências utilizam um padrão de compensação: se o débito na conta de o
 ## Como executar
 
 Pré-requisito: Docker Desktop instalado e em execução, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
+
 O Kafka está definido neste `docker-compose.yml` e precisa subir antes do `notification`!
 
 ```bash
