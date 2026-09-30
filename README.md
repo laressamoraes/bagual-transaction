@@ -10,13 +10,16 @@ Transferências utilizam um padrão de compensação: se o débito na conta de o
 * Criar transação (`POST /transactions`)
 * Buscar transação por id (`GET /transactions/{id}`)
 * Listar transações (`GET /transactions`)
-* Integração real com o account (débito/crédito via REST)
+* Integração real com o `account` (débito/crédito via REST)
 * Compensação automática em falha de transferência (padrão Saga)
 * Validação de dados de entrada
-* Tratamento centralizado de erros, incluindo erros propagados pelo account
+* Tratamento centralizado de erros, incluindo erros propagados pelo `account`
 * Migração de schema com Flyway
 * Testes unitários (regra de negócio, cenários de falha e compensação)
 * Containerização completa (aplicação + banco via Docker Compose)
+
+## Segurança
+Protegido com OAuth2/JWT via Keycloak ([bagual-auth](https://github.com/laressamoraes/bagual-auth)). Além de validar tokens recebidos, o serviço também atua como cliente OAuth2, obtendo seu próprio token (via `client_credentials`) para se autenticar ao chamar o `account`.
 
 ## Tecnologias
 - Java 21 + Spring Boot 3;
@@ -35,7 +38,7 @@ Transferências utilizam um padrão de compensação: se o débito na conta de o
 
 ## Como executar
 
-Pré-requisito: Docker Desktop instalado e em execução, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
+Pré-requisito: Docker Desktop instalado e em execução, o [auth](https://github.com/laressamoraes/bagual-auth) rodando, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
 
 O Kafka está definido neste `docker-compose.yml` e precisa subir antes do `notification`!
 
