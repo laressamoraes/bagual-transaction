@@ -21,6 +21,20 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/bagual-bank
+      client:
+        registration:
+          keycloak:
+            client-id: bagual-client
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8180/realms/bagual-bank
 
 server:
   port: 8082
