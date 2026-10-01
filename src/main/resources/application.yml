@@ -25,7 +25,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/bagual-bank
+          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/bagual-bank/protocol/openid-connect/certs}
       client:
         registration:
           keycloak:
@@ -34,7 +34,7 @@ spring:
             authorization-grant-type: client_credentials
         provider:
           keycloak:
-            issuer-uri: http://localhost:8180/realms/bagual-bank
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/bagual-bank}
 
 server:
   port: 8082

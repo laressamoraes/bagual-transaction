@@ -40,6 +40,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       ACCOUNT_SERVICE_URL: http://host.docker.internal:8081
       KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      KEYCLOAK_ISSUER_URI: http://host.docker.internal:8180/realms/bagual-bank
+      KEYCLOAK_JWK_URI: http://host.docker.internal:8180/realms/bagual-bank/protocol/openid-connect/certs
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
