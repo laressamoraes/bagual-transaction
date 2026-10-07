@@ -37,8 +37,15 @@ Protegido com OAuth2/JWT via Keycloak ([bagual-auth](https://github.com/laressam
 * **Kafka com listeners separados:** o broker expõe um listener externo e um interno, permitindo que `transaction` e `notification` se comuniquem de forma confiável mesmo estando containerizados.
 
 ## Como executar
+Pré-requisito: Docker Desktop instalado e em execução, o [auth](https://github.com/laressamoraes/bagual-auth) rodando e configurado, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
 
-Pré-requisito: Docker Desktop instalado e em execução, o [auth](https://github.com/laressamoraes/bagual-auth) rodando, e o [account](https://github.com/laressamoraes/bagual-account) rodando na porta 8081.
+Crie um arquivo `.env` na raiz do projeto, usando o exemplo `.env.example` como modelo, com o Client Secret do `bagual-client` (veja o README do [auth](https://github.com/laressamoraes/bagual-auth)):
+
+```
+KEYCLOAK_CLIENT_SECRET=<client_secret>
+```
+
+Sem este arquivo a aplicação não sobe, porque o Spring não consegue resolver a propriedade `client-secret`.
 
 O Kafka está definido neste `docker-compose.yml` e precisa subir antes do `notification`!
 
@@ -49,7 +56,6 @@ docker compose up --build -d
 A API fica disponível em: http://localhost:8082
 
 ## Rodando os testes
-
 ```bash
 mvn test
 ```
